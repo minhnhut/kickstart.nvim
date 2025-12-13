@@ -246,6 +246,13 @@ rtp:prepend(lazypath)
 --
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
+  {
+    'Mofiqul/dracula.nvim',
+    priority = 1000, -- Load colorscheme before other plugins
+    config = function()
+      vim.cmd.colorscheme 'dracula'
+    end,
+  },
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
 
@@ -304,7 +311,7 @@ require('lazy').setup({
     opts = {
       -- delay between pressing a key and opening which-key (milliseconds)
       -- this setting is independent of vim.o.timeoutlen
-      delay = 0,
+      delay = 1000,
       icons = {
         -- set icon mappings to true if you have a Nerd Font
         mappings = vim.g.have_nerd_font,
@@ -413,6 +420,12 @@ require('lazy').setup({
         --   },
         -- },
         -- pickers = {}
+        defaults = {
+          file_ignore_patterns = {
+            'node_modules/',
+            'vendor/',
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -876,28 +889,6 @@ require('lazy').setup({
     },
   },
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
-        },
-      }
-
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
-    end,
-  },
-
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
@@ -990,6 +981,129 @@ require('lazy').setup({
   -- Or use telescope!
   -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
   -- you can continue same window with `<space>sr` which resumes last telescope search
+
+  {
+    'adalessa/laravel.nvim',
+    dependencies = {
+      'MunifTanjim/nui.nvim',
+      'nvim-lua/plenary.nvim',
+      'nvim-neotest/nvim-nio',
+    },
+    cmd = { 'Laravel' },
+    keys = {
+      {
+        '<leader>ll',
+        function()
+          Laravel.pickers.laravel()
+        end,
+        desc = 'Laravel: Open Laravel Picker',
+      },
+      {
+        '<c-g>',
+        function()
+          Laravel.commands.run 'view:finder'
+        end,
+        desc = 'Laravel: Open View Finder',
+      },
+      {
+        '<leader>la',
+        function()
+          Laravel.pickers.artisan()
+        end,
+        desc = 'Laravel: Open Artisan Picker',
+      },
+      {
+        '<leader>lt',
+        function()
+          Laravel.commands.run 'actions'
+        end,
+        desc = 'Laravel: Open Actions Picker',
+      },
+      {
+        '<leader>lr',
+        function()
+          Laravel.pickers.routes()
+        end,
+        desc = 'Laravel: Open Routes Picker',
+      },
+      {
+        '<leader>lh',
+        function()
+          Laravel.run 'artisan docs'
+        end,
+        desc = 'Laravel: Open Documentation',
+      },
+      {
+        '<leader>lm',
+        function()
+          Laravel.pickers.make()
+        end,
+        desc = 'Laravel: Open Make Picker',
+      },
+      {
+        '<leader>lc',
+        function()
+          Laravel.pickers.commands()
+        end,
+        desc = 'Laravel: Open Commands Picker',
+      },
+      {
+        '<leader>lo',
+        function()
+          Laravel.pickers.resources()
+        end,
+        desc = 'Laravel: Open Resources Picker',
+      },
+      {
+        '<leader>lp',
+        function()
+          Laravel.commands.run 'command_center'
+        end,
+        desc = 'Laravel: Open Command Center',
+      },
+      {
+        'gf',
+        function()
+          local ok, res = pcall(function()
+            if Laravel.app('gf').cursorOnResource() then
+              return "<cmd>lua Laravel.commands.run('gf')<cr>"
+            end
+          end)
+          if not ok or not res then
+            return 'gf'
+          end
+          return res
+        end,
+        expr = true,
+        noremap = true,
+      },
+    },
+    event = { 'VeryLazy' },
+    opts = {
+      features = {
+        pickers = {
+          provider = 'telescope', -- "snacks | telescope | fzf-lua | ui-select"
+        },
+      },
+    },
+  },
+
+  -- Claude Code Integration
+  {
+    'greggh/claude-code.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim', -- Required for git operations
+    },
+    config = function()
+      require('claude-code').setup {
+        window = {
+          position = 'horizontal',
+        },
+      }
+
+      vim.keymap.set('n', '<leader>cc', '<cmd>ClaudeCode<CR>', { desc = 'Toggle Claude Code' })
+    end,
+  },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
