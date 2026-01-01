@@ -944,11 +944,12 @@ require('lazy').setup({
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    branch = 'master', -- <--- ADD THIS LINE
     build = ':TSUpdate',
-    lazy = false,
+    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'php', 'query', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -1106,22 +1107,7 @@ require('lazy').setup({
     },
   },
 
-  -- Claude Code Integration
-  {
-    'greggh/claude-code.nvim',
-    dependencies = {
-      'nvim-lua/plenary.nvim', -- Required for git operations
-    },
-    config = function()
-      require('claude-code').setup {
-        window = {
-          position = 'vertical',
-        },
-      }
-
-      vim.keymap.set('n', '<leader>cc', '<cmd>ClaudeCode<CR>', { desc = 'Toggle Claude Code' })
-    end,
-  },
+  -- My other plugins
   {
     'nvim-tree/nvim-tree.lua',
     version = '*', -- Recommended
@@ -1130,9 +1116,65 @@ require('lazy').setup({
       'nvim-tree/nvim-web-devicons', -- Optional, but recommended
     },
     config = function()
-      require('nvim-tree').setup {
-        vim.keymap.set('n', '<leader>e', '<cmd>NvimTreeToggle<CR>', { desc = 'Toggle Nvim Tree' }),
+      require('nvim-tree').setup {}
+      vim.keymap.set('n', '<leader>e', '<cmd>NvimTreeToggle<CR>', { desc = 'Toggle Nvim Tree' })
+
+      -- Open NvimTree on startup if no file was specified
+      vim.api.nvim_create_autocmd('VimEnter', {
+        callback = function()
+          if vim.fn.argc() == 0 and vim.fn.line2byte('$') == -1 then
+            require('nvim-tree.api').tree.open()
+          end
+        end,
+      })
+    end,
+  },
+  {
+    'akinsho/bufferline.nvim',
+    version = '*',
+    dependencies = 'nvim-tree/nvim-web-devicons',
+    config = function()
+      require('bufferline').setup {
+        options = {
+          offsets = {
+            {
+              filetype = 'NvimTree',
+              text = 'Nvim Tree',
+              separator = true,
+              text_align = 'left',
+            },
+          },
+          diagnostics = 'nvim_lsp',
+          separator_style = { '', '' },
+          modified_icon = '●',
+          show_close_icon = false,
+          show_buffer_close_icons = false,
+        },
       }
+      vim.keymap.set('n', '<Tab>', '<cmd>BufferLineCycleNext<CR>', { desc = 'Next buffer' })
+      vim.keymap.set('n', '<S-Tab>', '<cmd>BufferLineCyclePrev<CR>', { desc = 'Previous buffer' })
+      vim.keymap.set('n', '<leader>bb', '<cmd>Telescope buffers<CR>', { desc = 'Search buffers' })
+      vim.keymap.set('n', '<leader>bp', '<cmd>BufferLinePick<CR>', { desc = 'Pick buffer' })
+      vim.keymap.set('n', '<leader>bc', '<cmd>BufferLinePickClose<CR>', { desc = 'Pick buffer to close' })
+      vim.keymap.set('n', '<leader>bx', function()
+        local buf = vim.api.nvim_get_current_buf()
+        vim.cmd('BufferLineCyclePrev')
+        vim.api.nvim_buf_delete(buf, {})
+      end, { desc = 'Close current buffer' })
+      vim.keymap.set('n', '<leader>bo', '<cmd>BufferLineCloseOthers<CR>', { desc = 'Close other buffers' })
+      vim.keymap.set('n', '<leader>bl', '<cmd>BufferLineCloseLeft<CR>', { desc = 'Close buffers to the left' })
+      vim.keymap.set('n', '<leader>br', '<cmd>BufferLineCloseRight<CR>', { desc = 'Close buffers to the right' })
+
+      -- Window management under <leader>w
+      vim.keymap.set('n', '<leader>wh', '<C-w>h', { desc = 'Go to left window' })
+      vim.keymap.set('n', '<leader>wj', '<C-w>j', { desc = 'Go to lower window' })
+      vim.keymap.set('n', '<leader>wk', '<C-w>k', { desc = 'Go to upper window' })
+      vim.keymap.set('n', '<leader>wl', '<C-w>l', { desc = 'Go to right window' })
+      vim.keymap.set('n', '<leader>ws', '<cmd>split<CR>', { desc = 'Split horizontal' })
+      vim.keymap.set('n', '<leader>wv', '<cmd>vsplit<CR>', { desc = 'Split vertical' })
+      vim.keymap.set('n', '<leader>wc', '<cmd>close<CR>', { desc = 'Close window' })
+      vim.keymap.set('n', '<leader>wo', '<cmd>only<CR>', { desc = 'Close other windows' })
+      vim.keymap.set('n', '<leader>w=', '<C-w>=', { desc = 'Equalize window sizes' })
     end,
   },
 }, {
