@@ -423,10 +423,16 @@ require('lazy').setup({
         defaults = {
           file_ignore_patterns = {
             'node_modules/',
-            'vendor/',
+            -- 'vendor/',
           },
         },
         extensions = {
+          fzf = {
+            fuzzy = true,
+            override_generic_sorter = true,
+            override_file_sorter = true,
+            case_mode = 'smart_case',
+          },
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
           },
@@ -449,6 +455,13 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', '<leader>sa', function()
+        require('telescope.builtin').find_files {
+          hidden = true,
+          no_ignore = true,
+          no_ignore_parent = true,
+        }
+      end, { desc = '[S]earch [A]ll files' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -1078,6 +1091,11 @@ require('lazy').setup({
         noremap = true,
       },
     },
+    notifications = true,
+    sail = {
+      enabled = true,
+      auto_detect = true,
+    },
     event = { 'VeryLazy' },
     opts = {
       features = {
@@ -1097,11 +1115,24 @@ require('lazy').setup({
     config = function()
       require('claude-code').setup {
         window = {
-          position = 'horizontal',
+          position = 'vertical',
         },
       }
 
       vim.keymap.set('n', '<leader>cc', '<cmd>ClaudeCode<CR>', { desc = 'Toggle Claude Code' })
+    end,
+  },
+  {
+    'nvim-tree/nvim-tree.lua',
+    version = '*', -- Recommended
+    lazy = false, -- Set to false if you want it to load immediately on startup
+    dependencies = {
+      'nvim-tree/nvim-web-devicons', -- Optional, but recommended
+    },
+    config = function()
+      require('nvim-tree').setup {
+        vim.keymap.set('n', '<leader>e', '<cmd>NvimTreeToggle<CR>', { desc = 'Toggle Nvim Tree' }),
+      }
     end,
   },
 }, {
